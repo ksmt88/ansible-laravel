@@ -1,0 +1,33 @@
+# package install
+- name: Install some package
+  yum:
+    name: "{{ packages }}"
+    state: installed
+    update_cache: yes
+    enablerepo: remi,remi-php73
+  vars:
+    packages:
+      - php
+      - php-devel
+      - php-common
+      - php-fpm
+      - php-opcache
+      - php-pecl-redis
+      - php-mbstring
+      - php-mcrypt
+      - php-mysqlnd
+      - php-pdo
+      - php-gd
+      - php-xml
+      - php-zip
+
+#- name: Set php.ini
+#  copy: src=php.ini dest=/etc/php/7.3/cli
+- name: Ensure php-fpm is restarted and enabled to start at boot.
+  service: name=php-fpm state=restarted enabled=yes
+
+# Composer
+- name: Composer install
+  shell: curl -sS https://getcomposer.org/installer | php -- --install-dir=/bin && mv /bin/composer.phar /bin/composer
+  args:
+    creates: /bin/composer

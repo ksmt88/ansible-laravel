@@ -1,0 +1,25 @@
+# Ref: https://github.com/Servers-for-Hackers/ansible-ssl-example/blob/master/tasks/main.yml
+---
+# package install
+- name: Install ssl package
+  yum:
+    name: "{{ packages }}"
+    state: installed
+    update_cache: yes
+  vars:
+    packages:
+      - openssl
+
+- name: Create SSL directry
+  file: dest=/etc/ssl/laravel mode=0700 state=directory owner={{ web_user }} group={{ web_user }}
+  register: ssldir
+
+- name: Upload unencrypted key file
+  when: ssldir is success
+  no_log: False
+  copy: content="{{ ssl_key }}" dest=/etc/ssl/laravel/server.key owner={{ web_user }} group={{ web_user }}
+
+- name: Upload unencrypted cert file
+  when: ssldir is success
+  no_log: False
+  copy: content="{{ ssl_cer }}" dest=/etc/ssl/laravel/server.cer owner={{ web_user }} group={{ web_user }}

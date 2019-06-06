@@ -1,0 +1,14 @@
+- hosts: web
+  become: yes
+  gather_facts: true
+  vars_files:
+    - vars/webserver.yml
+    - vars/secrets.yml
+  roles:
+    - common
+    - php
+    - user
+    - ssl
+    - nginx
+    - web
+    - geerlingguy.mysql

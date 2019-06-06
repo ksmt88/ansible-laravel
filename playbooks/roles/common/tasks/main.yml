@@ -1,0 +1,82 @@
+#update
+- name: Yum update
+  yum: name=* state=latest
+
+# rpm
+- name: Import PGP key for Remi's RPM repository
+  tags: remi
+  rpm_key: state=present key=http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+
+- name: Install package for Remi's RPM repository
+  tags: remi
+  yum:
+    name: "http://rpms.remirepo.net/enterprise/remi-release-{{ centos_version }}.rpm"
+    state: present
+
+# ca
+- name: Install ca-certificates
+  yum: name=ca-certificates state=latest
+
+# package install
+- name: Install some package
+  yum:
+    name: "{{ packages }}"
+    state: installed
+    update_cache: yes
+  vars:
+    packages:
+      - chrony
+      - vim
+      - git
+      - zip
+      - ibus-kkc
+      - vlgothic-*
+
+# ntp
+- name: disable servers
+  replace: >
+    dest=/etc/chrony.conf
+    regexp='^(server \d+.centos.pool.ntp.org iburst)'
+    replace='# \1'
+- name: add servers
+  blockinfile:
+    dest: /etc/chrony.conf
+    state: present
+    content: |
+
+      # ntp servers
+      server ntp.jst.mfeed.ad.jp iburst
+      server ntp.nict.jp iburst
+- name: add allow ntp client
+  lineinfile: >
+    dest=/etc/chrony.conf
+    insertafter="#allow 192.168/16"
+    line="allow 192.168.1.0/24"
+- name: chrony start and enable
+  service:
+    name: chronyd
+    state: restarted
+    enabled: yes
+
+# locale
+- name: Change locale
+  command: localectl set-locale LANG=ja_JP.UTF-8
+- name: Set timezone to Asia/Tokyo
+  timezone:
+    name: Asia/Tokyo
+
+# firewall
+- name: Set firewall
+  firewalld:
+    service: "{{ item.service }}"
+    permanent: true
+    state: enabled
+    zone: public
+  with_items:
+      - service: http
+      - service: https
+- name: Firewalld is running and enabled
+  service:
+    name: firewalld
+    state: restarted
+    enabled: yes

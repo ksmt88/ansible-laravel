@@ -1,0 +1,45 @@
+- name: Create directory for application
+  file: path=/var/www/web state=directory owner={{ web_user }} group={{ web_user }} mode=0755
+
+- name: Set GitHub environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^BUNDLE_GITHUB__COM='
+    line: "BUNDLE_GITHUB__COM={{ github_oauth_token }}"
+- name: Set basic auth userame environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^BASIC_AUTH_USER='
+    line: "BASIC_AUTH_USER={{ basic_auth_user }}"
+- name: Set basic auth password environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^BASIC_AUTH_PASSWORD='
+    line: "BASIC_AUTH_PASSWORD={{ basic_auth_password }}"
+
+- name: Set Slack WebHook for engineer URL environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^WEBHOOK_URL='
+    line: "WEBHOOK_URL={{ webhook_url }}"
+  when: stage != 'dev'
+- name: Set application URL environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^APPLICATION_URL='
+    line: "APPLICATION_URL={{ application_url }}"
+
+- name: Set ENV environment
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    regexp: '^ENV='
+    line: "ENV={{ stage }}"
+
+- name: Include environment variables
+  include_vars: "{{ stage }}.yml"

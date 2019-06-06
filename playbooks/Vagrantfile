@@ -1,0 +1,25 @@
+VAGRANTFILE_API_VERSION = "2"
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+  config.vm.define :laravel do |c|
+    c.vm.hostname = 'laravel-dev'
+    c.vm.box = 'bento/centos-7.4'
+    c.vm.network :forwarded_port, guest: 80, host: 80
+    c.vm.network :forwarded_port, guest: 443, host: 443
+    c.vm.network :forwarded_port, guest: 3306, host: 3306
+    c.vm.network :forwarded_port, guest: 6379, host: 6379
+    c.vm.network 'private_network', ip: '192.168.33.11'
+    c.vm.provider :virtualbox do |vb|
+      vb.memory = 4096
+    end
+    c.vm.provision "shell", inline: <<-SHELL
+        sudo yum -y update
+    SHELL
+    c.vm.provision :ansible do |ansible|
+      ansible.playbook = 'site.yml'
+      ansible.inventory_path = 'inventories/dev/hosts'
+      ansible.limit = :all
+      ansible.ask_vault_pass = false
+    end
+  end
+end

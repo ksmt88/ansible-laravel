@@ -1,0 +1,1 @@
+web ansible_port=2222 ansible_host=127.0.0.1 application_url=127.0.0.1:3000 stage=dev

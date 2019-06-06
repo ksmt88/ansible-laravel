@@ -1,0 +1,13 @@
+# common
+ag_timezone: Asia/Tokyo
+users:
+  - ksmt88
+  #- {github user name}
+web_user: sample-user
+
+# cent os
+centos_version: 7
+
+# PHP memory limit
+php_version: '7.3'
+php_memory_limit: "1024M"
