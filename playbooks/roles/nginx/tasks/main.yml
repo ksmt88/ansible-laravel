@@ -26,4 +26,7 @@
   when: stage != "dev"
 
 - name: Ensure nginx is restarted and enabled to start at boot.
-  service: name=nginx state=restarted enabled=yes
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

@@ -9,10 +9,18 @@
     line: '%{{ web_user }} ALL=(ALL) NOPASSWD: ALL'
 
 - name: Create 'web_user' user
-  user : name={{ web_user }} group={{ web_user }} groups=wheel shell=/bin/bash
+  user:
+    name: "{{ web_user }}"
+    group: "{{ web_user }}"
+    groups: wheel
+    shell: /bin/bash
 
 - name: Create users
-  user: name={{ item }} group={{ web_user }} groups=wheel shell=/bin/bash
+  user:
+    name: "{{ item }}"
+    group: "{{ web_user }}"
+    groups: wheel
+    shell: /bin/bash
   with_items: "{{ users }}"
 
 - name: Set authorized key to users

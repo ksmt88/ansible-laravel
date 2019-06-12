@@ -1,0 +1,73 @@
+---
+- name: download epel-release
+  yum:
+    name: https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
+    state: present
+
+- name: install mysql
+  yum:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - mysql-community-devel*
+      - mysql-community-server*
+      - MySQL-python
+
+- name: copy my.cnf
+  copy:
+    src: my.cnf
+    dest: /etc/my.cnf
+    mode: 0644
+
+- name: enable mysql
+  systemd:
+    name: mysqld
+    state: restarted
+    enabled: yes
+
+- name: check if mysql log file size is 0 or not
+  stat: path=/var/log/mysqld.log
+  register: log_file
+  changed_when: false
+
+- name: get root password
+  shell: "grep 'A temporary password is generated for root@localhost' /var/log/mysqld.log | awk -F ' ' '{print $(NF)}'"
+  register: temporary_password
+  when: log_file.stat.size|int <= 2000
+
+- name: change the root password
+  command: >
+    mysqladmin password '{{ mysql.root_password }}' -u root -p'{{ temporary_password.stdout }}'
+  changed_when: false
+  register: change_password
+  when: log_file.stat.size|int <= 2000
+
+- name: run mysql_secure_installation
+  command: mysql_secure_installation -u root -p'{{ mysql.root_password }}' -D
+  changed_when: false
+  when: log_file.stat.size|int <= 2000
+
+- name: Ensure MySQL databases are present.
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+    name: "{{ item.name }}"
+    collation: "{{ item.collation | default('utf8mb4_general_ci') }}"
+    encoding: "{{ item.encoding | default('utf8mb4') }}"
+    state: "{{ item.state | default('present') }}"
+  with_items: "{{ mysql.databases }}"
+
+- name: create mysql client user
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.priv }}"
+    state: present
+    host: "{{ item.host }}"
+  with_items:
+    - "{{ mysql.users }}"
+  failed_when: false

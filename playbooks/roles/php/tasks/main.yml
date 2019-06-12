@@ -17,6 +17,7 @@
       - php-mcrypt
       - php-mysqlnd
       - php-pdo
+      - php-process
       - php-gd
       - php-xml
       - php-zip
@@ -24,7 +25,10 @@
 #- name: Set php.ini
 #  copy: src=php.ini dest=/etc/php/7.3/cli
 - name: Ensure php-fpm is restarted and enabled to start at boot.
-  service: name=php-fpm state=restarted enabled=yes
+  service:
+    name: php-fpm
+    state: restarted
+    enabled: yes
 
 # Composer
 - name: Composer install

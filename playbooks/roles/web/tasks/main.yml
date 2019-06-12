@@ -1,5 +1,10 @@
 - name: Create directory for application
-  file: path=/var/www/web state=directory owner={{ web_user }} group={{ web_user }} mode=0755
+  file:
+    path: /var/www/web
+    state: directory
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: 0755
 
 - name: Set GitHub environment
   lineinfile:
@@ -7,12 +12,14 @@
     state: present
     regexp: '^BUNDLE_GITHUB__COM='
     line: "BUNDLE_GITHUB__COM={{ github_oauth_token }}"
+
 - name: Set basic auth userame environment
   lineinfile:
     dest: /etc/environment
     state: present
     regexp: '^BASIC_AUTH_USER='
     line: "BASIC_AUTH_USER={{ basic_auth_user }}"
+
 - name: Set basic auth password environment
   lineinfile:
     dest: /etc/environment
@@ -27,6 +34,7 @@
     regexp: '^WEBHOOK_URL='
     line: "WEBHOOK_URL={{ webhook_url }}"
   when: stage != 'dev'
+
 - name: Set application URL environment
   lineinfile:
     dest: /etc/environment

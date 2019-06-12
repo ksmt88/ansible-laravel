@@ -29,6 +29,7 @@
       - vim
       - git
       - zip
+      - unzip
       - ibus-kkc
       - vlgothic-*
 
