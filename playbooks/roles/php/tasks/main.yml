@@ -22,8 +22,12 @@
       - php-xml
       - php-zip
 
-#- name: Set php.ini
-#  copy: src=php.ini dest=/etc/php/7.3/cli
+- name: copy php.ini
+  copy:
+    src: php.ini
+    dest: /etc/php.ini
+    mode: 0644
+
 - name: Ensure php-fpm is restarted and enabled to start at boot.
   service:
     name: php-fpm

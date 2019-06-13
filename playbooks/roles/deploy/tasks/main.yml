@@ -1,0 +1,15 @@
+- name: Install Deployer
+  composer:
+    command: require
+    arguments: deployer/dist --dev
+    working_dir: /home/{{ web_user }}
+  when: stage == "dev"
+
+- name: Copy deploy.php (dev only)
+  template:
+    src: deploy.php
+    dest: /home/{{ web_user }}
+    owner: "{{ web_user }}"
+    group: "{{ web_user }}"
+    mode: 0644
+  when: stage == "dev"
